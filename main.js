@@ -32,8 +32,8 @@ require([
                 color: [50, 50, 50, 1],
               },
               halo: {
-                size: 1,
-                color: [255, 255, 255, 0.5],
+                size: 2,
+                color: [255, 255, 255, 0.8],
               },
               font: {
                 size: 11,
