@@ -1,0 +1,79 @@
+html,
+body,
+#viewDiv {
+  padding: 0;
+  margin: 0;
+  height: 100%;
+  width: 100%;
+}
+
+#setting {
+  padding: 10px;
+}
+
+html,
+body,
+#viewDiv {
+  padding: 0;
+  margin: 0;
+  height: 100%;
+  width: 100%;
+}
+
+.main {
+  background-color: rgba(255, 255, 255, 1);
+  padding: 0;
+  font-family: "Avenir Next", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  color: rgb(100, 100, 100);
+  overflow: auto;
+}
+
+.main p {
+  line-height: 1.7em;
+}
+
+.section {
+  padding-bottom: 1em;
+}
+
+.title {
+  border-bottom: 1px solid rgb(100, 100, 100);
+  padding: 0.5em 1.5em;
+}
+
+.sections {
+  padding: 1.5em;
+}
+
+/* large screen and medium screen */
+
+@media screen and (min-width: 681px) {
+  .main {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    max-width: 400px;
+  }
+}
+
+/* mobile */
+
+@media screen and (min-width: 320px) and (max-width: 680px) {
+  .main {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 40%;
+  }
+}
+
+button {
+  margin: 1em 0;
+}
+
+a {
+  text-decoration: none;
+  border-bottom: 1px dashed rgb(100, 100, 100);
+  color: rgb(100, 100, 100);
+}
