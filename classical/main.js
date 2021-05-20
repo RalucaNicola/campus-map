@@ -306,7 +306,7 @@ require([
 
   const view = new SceneView({
     container: "viewDiv",
-    qualityProfile: "high",
+    qualityProfile: "medium",
     map: webscene,
     environment: {
       lighting: {
