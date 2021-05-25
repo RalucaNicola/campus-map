@@ -6,8 +6,8 @@
     <title>Hand drawn campus map</title>
 
     <link rel="stylesheet" href="https://js.arcgis.com/4.19/esri/themes/light/main.css" />
-    <link rel="preconnect" href="https://fonts.gstatic.com">
-<link href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@700&display=swap" rel="stylesheet" />
     <script src="https://js.arcgis.com/4.19/"></script>
 
     <style>
@@ -21,7 +21,7 @@
       }
 
       canvas {
-        filter: saturate(1.6)
+        filter: saturate(1.6);
       }
     </style>
 
@@ -32,7 +32,6 @@
         "esri/Graphic",
         "esri/WebScene",
         "esri/views/SceneView",
-        "esri/widgets/Editor",
         "esri/tasks/support/Query",
         "esri/tasks/QueryTask",
         "esri/geometry/support/MeshComponent",
@@ -43,7 +42,6 @@
         "esri/geometry/Point",
         "esri/geometry/SpatialReference",
         "esri/layers/support/LabelClass",
-        "esri/widgets/Editor",
         "esri/geometry/support/MeshMaterialMetallicRoughness",
       ], function (
         FeatureLayer,
@@ -51,7 +49,6 @@
         Graphic,
         WebScene,
         SceneView,
-        Editor,
         Query,
         QueryTask,
         MeshComponent,
@@ -62,222 +59,222 @@
         Point,
         SpatialReference,
         LabelClass,
-        Editor,
         MeshMaterialMetallicRoughness
       ) {
-
         const webscene = new WebScene({
           ground: {
-            surfaceColor: "white"
-          }
+            surfaceColor: "white",
+          },
         });
 
         const sceneLayer = new SceneLayer({
-          url: "https://tiles.arcgis.com/tiles/cFEFS0EWrhfDeVw9/arcgis/rest/services/campus_buildings_hand_drawn/SceneServer",
+          url: "https://tiles.arcgis.com/tiles/V6ZHFr6zdgNZuVG0/arcgis/rest/services/campus_buildings_sketch/SceneServer",
           screenSizePerspectiveEnabled: true,
           renderer: {
             type: "simple",
             symbol: {
               type: "mesh-3d",
-              symbolLayers: [{
-                type: "fill",
-                material: { color: "white" },
-                edges: {
-                  type: "sketch",
-                  color: [50, 50, 50, 1],
-                  size: 1,
-                  extensionLength: 5
-                }
-              }]
-            }
+              symbolLayers: [
+                {
+                  type: "fill",
+                  material: { color: "white" },
+                  edges: {
+                    type: "sketch",
+                    color: [50, 50, 50, 1],
+                    size: 1,
+                    extensionLength: 5,
+                  },
+                },
+              ],
+            },
+          },
+          popupTemplate: {
+            title: "",
+            content: "Building: {NAME}"
           },
           labelsVisible: true,
           labelingInfo: [
             new LabelClass({
-              labelExpressionInfo: { expression: "$feature.name"},
+              labelExpressionInfo: { expression: "$feature.name" },
               symbol: {
                 type: "label-3d",
-                symbolLayers: [{
-                  type: "text",
-                  material: {
-                    color: [50, 50, 50, 1]
+                symbolLayers: [
+                  {
+                    type: "text",
+                    material: {
+                      color: [50, 50, 50, 1],
+                    },
+                    halo: {
+                      size: 2,
+                      color: [255, 255, 255, 0.8],
+                    },
+                    font: {
+                      size: 14,
+                      family: `'Amatic SC', sans-serif`,
+                    },
                   },
-                  halo: {
-                    size:  2,
-                    color: [255, 255, 255, 0.8]
-                  },
-                  font: {
-                    size:  14,
-                    family: `'Amatic SC', cursive, sans-serif`
-                  }
-                }],
+                ],
                 verticalOffset: {
                   screenLength: 20,
                   maxWorldLength: 200,
-                  minWorldLength: 0
+                  minWorldLength: 0,
                 },
                 callout: {
                   type: "line",
                   size: 1,
                   color: [50, 50, 50],
                   border: {
-                    color: [0, 0, 0, 0]
-                  }
-                }
-              }
-            })
-          ]
+                    color: [0, 0, 0, 0],
+                  },
+                },
+              },
+            }),
+          ],
         });
         webscene.add(sceneLayer);
 
         const treeLayer = new GraphicsLayer({
           elevationInfo: {
-            mode: "relative-to-ground"
-          }
+            mode: "relative-to-ground",
+          },
         });
         webscene.add(treeLayer);
 
         // Loading trees as a mesh, so that we can apply sketch edges
         const queryTreeTask = new QueryTask({
-          url: "https://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/Campus_features/FeatureServer/0"
+          url: "https://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/Campus_features/FeatureServer/0",
         });
 
-        queryTreeTask.execute({
-          returnZ: true,
-          returnGeometry: true,
-          outFields: ["Class", "Height", "Rotation"],
-          where: "1=1"
-        }).then((result) => {
-          for (let i = 0; i < result.features.length; i++) {
-            const location = result.features[i].geometry;
-            const type = result.features[i].attributes["Class"];
-            const size = result.features[i].attributes["Height"];
-            const rotation = result.features[i].attributes["Rotation"];
-            const url = type === "Eucalyptus" ? "../assets/trees/Apricot.glb": "../assets/trees/Leyland_Cypress.glb" ;
-
-            // Function that converts a polygon into a 3D mesh geometry
-            Mesh.createFromGLTF(location, url).then(function(mesh) {
-              mesh.components[0].material = new MeshMaterialMetallicRoughness({
-              color: [191, 207, 157],
-              roughness: 1,
-              metallic: 0
-            });
-            const scale = type === "Eucalyptus" ? 0.15 : 0.20;
-            mesh.scale(size * scale, {origin: location});
-            mesh.rotate(0, 0, rotation);
-
-            treeLayer.add(new Graphic({
-              geometry: mesh,
-              symbol: {
-                type: "mesh-3d",
-                symbolLayers: [{ type: "fill",
-                edges: {
-                  type: "sketch",
-                  color: [50, 50, 50, 0.6],
-                  size: 1,
-                  extensionLength: 5
-                }}]
-              }
-            }));
-            }).catch(console.error);
-          }
-        });
-
-        const materials =  {
-          Parc: new MeshMaterialMetallicRoughness({
-            colorTexture: "./park-texture.jpg",
-            roughness: 1,
-            metallic: 0
-          }),
-          Water: new MeshMaterialMetallicRoughness({
-            colorTexture: "./water-texture.jpg",
-            roughness: 1,
-            metallic: 0
-          }),
-          Parking: new MeshMaterialMetallicRoughness({
-
-            colorTexture: "./parking-texture.jpg",
-            roughness: 1,
-            metallic: 0
-          }),
-          Pedestrian: new MeshMaterialMetallicRoughness({
-            color: [0, 0, 0, 0],
-            roughness: 1,
-            metallic: 0
+        queryTreeTask
+          .execute({
+            returnZ: true,
+            returnGeometry: true,
+            outFields: ["Class", "Height", "Rotation"],
+            where: "1=1",
           })
-        }
+          .then((result) => {
+            for (let i = 0; i < result.features.length; i++) {
+              const location = result.features[i].geometry;
+              const type = result.features[i].attributes["Class"];
+              const size = result.features[i].attributes["Height"];
+              const rotation = result.features[i].attributes["Rotation"];
+              const url = type === "Eucalyptus" ? "../assets/trees/Apricot.glb" : "../assets/trees/Leyland_Cypress.glb";
 
-        const areasLayer = new GraphicsLayer({
+              // Function that converts a polygon into a 3D mesh geometry
+              Mesh.createFromGLTF(location, url)
+                .then(function (mesh) {
+                  // color tree leafs
+                  mesh.components[1].material = new MeshMaterialMetallicRoughness({
+                    color: [191, 207, 157],
+                    roughness: 1,
+                    metallic: 0,
+                  });
+                  // color trunk
+                  mesh.components[0].material = new MeshMaterialMetallicRoughness({
+                    color: [204, 175, 124],
+                    roughness: 1,
+                    metallic: 0,
+                  });
+                  const scale = type === "Eucalyptus" ? 0.15 : 0.2;
+                  mesh.scale(size * scale, { origin: location });
+                  mesh.rotate(0, 0, rotation);
+
+                  treeLayer.add(
+                    new Graphic({
+                      geometry: mesh,
+                      symbol: {
+                        type: "mesh-3d",
+                        symbolLayers: [
+                          {
+                            type: "fill",
+                            edges: {
+                              type: "sketch",
+                              color: [50, 50, 50, 0.6],
+                              size: 1,
+                              extensionLength: 5,
+                            },
+                          },
+                        ],
+                      },
+                    })
+                  );
+                })
+                .catch(console.error);
+            }
+          });
+
+        const areasLayer = new SceneLayer({
+          url: "https://tiles.arcgis.com/tiles/V6ZHFr6zdgNZuVG0/arcgis/rest/services/campus_basemap_patterns/SceneServer",
           elevationInfo: {
-            mode: "relative-to-ground",
-            offset: 0.3
-          }
+            mode: "absolute-height",
+            offset: 0.1,
+          },
+          renderer: {
+            type: "simple",
+            symbol: {
+              type: "mesh-3d",
+              symbolLayers: [
+                {
+                  type: "fill",
+                  edges: {
+                    type: "sketch",
+                    color: [50, 50, 50, 1],
+                    size: 1,
+                    extensionLength: 5,
+                  },
+                  castShadows: false,
+                },
+              ],
+            },
+          },
         });
         webscene.add(areasLayer);
 
-        // Lake polygon geometry is stored in a feature layer
+        const pedestrianAreaLayer = new GraphicsLayer();
+        webscene.add(pedestrianAreaLayer);
+
         const queryTask = new QueryTask({
-          url: "https://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/Campus_features/FeatureServer/2"
+          url: "https://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/Campus_features/FeatureServer/2",
         });
 
-        queryTask.execute({
-          returnZ: true,
-          returnGeometry: true,
-          outFields: ["Class"],
-          where: "1=1"
-        }).then((result) => {
-          for (let i = 0; i < result.features.length; i++) {
-            const area = result.features[i].geometry;
-            const type = result.features[i].attributes["Class"];
+        queryTask
+          .execute({
+            returnZ: true,
+            returnGeometry: true,
+            where: "Class='Pedestrian'",
+          })
+          .then((result) => {
+            for (let i = 0; i < result.features.length; i++) {
+              console.log(result);
+              const area = result.features[i].geometry;
 
-            //if (type !== "Pedestrian") {
-            // Function that converts a polygon into a 3D mesh geometry
-            const mesh = Mesh.createFromPolygon(area);
-            // Set uv coordinates that are used to map the texture on the geometry
-            mesh.vertexAttributes.uv = getUVCoordinates(mesh);
-            mesh.components[0].material = materials[type];
+              // Function that converts a polygon into a 3D mesh geometry
+              const mesh = Mesh.createFromPolygon(area);
 
-            areasLayer.add(new Graphic({
-              geometry: mesh,
-              symbol: {
-                type: "mesh-3d",
-                symbolLayers: [{ type: "fill", edges: {
-                  type: "sketch",
-                  color: [50, 50, 50, 1],
-                  size: 1,
-                  extensionLength: 5
-                }}]
-              }
-            }));
-            //}
-
-
-
-          }
-        });
-
-        // Normalize mesh vertex positions to use them
-        // as UV coordinates for the texture mapping
-        function getUVCoordinates(mesh) {
-          const uv = [];
-          const xmin = mesh.extent.xmin;
-          const xmax = mesh.extent.xmax;
-          const ymin = mesh.extent.ymin;
-          const ymax = mesh.extent.ymax;
-
-          const position = mesh.vertexAttributes.position;
-
-          for (let i = 0; i < position.length; i+=3) {
-            const x = position[i];
-            const y = position[i + 1];
-            const u = (x - xmin) / (xmax - xmin);
-            const v = (y - ymin) / (ymax - ymin);
-            uv.push(u);
-            uv.push(v);
-          }
-
-          return uv;
-        }
+              pedestrianAreaLayer.add(
+                new Graphic({
+                  geometry: mesh,
+                  symbol: {
+                    type: "mesh-3d",
+                    symbolLayers: [
+                      {
+                        type: "fill",
+                        material: {
+                          color: [0, 0, 0, 0],
+                        },
+                        edges: {
+                          type: "sketch",
+                          color: [50, 50, 50, 1],
+                          size: 1,
+                          extensionLength: 5,
+                        },
+                      },
+                    ],
+                  },
+                })
+              );
+            }
+          });
 
         const poi = new FeatureLayer({
           url: "https://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/CampusPOI/FeatureServer",
@@ -312,7 +309,8 @@
                     },
                   },
                 },
-              }]
+              },
+            ],
           },
         });
         webscene.add(poi);
@@ -322,146 +320,23 @@
           qualityProfile: "high",
           map: webscene,
           viewingMode: "global",
-          popup: {
-            defaultPopupTemplateEnabled: true,
-          },
           environment: {
             lighting: {
-              date: "Mon January 15 2021 19:30:00 GMT+0100 (Central European Standard Time)"
-            }
+              date: "Mon January 15 2021 19:30:00 GMT+0100 (Central European Standard Time)",
+            },
           },
           camera: {
-            position: [
-              -88.97900008,
-              39.83987331,
-              149.51383
-            ],
+            position: [-88.97900008, 39.83987331, 149.51383],
             heading: 45.34,
-            tilt: 70.69
+            tilt: 70.69,
+          },
+          highlightOptions: {
+            color: "#505050"
           }
         });
 
         view.environment.lighting.ambientOcclusionEnabled = false;
         view.environment.lighting.directShadowsEnabled = true;
-
-        // view.when(function () {
-          //view.popup.autoOpenEnabled = true; //disable popups
-          // view.environment.lighting.waterReflectionEnabled = true;
-          // Create the Editor
-          var editor = new Editor({
-            view: view,
-          });
-
-          editor.viewModel.sketchViewModel.snappingOptions = {
-            selfEnabled: true,
-          };
-          // Add widget to top-right of the view
-          view.ui.add(editor, "top-right");
-
-          // const settings = {
-          //   buildingLabels: false,
-          //   location: false,
-          //   route: false
-          // }
-
-          // const showLabelsBtn = document.getElementById("showLabels");
-          // showLabelsBtn.addEventListener("click", function(event) {
-          //   settings.buildingLabels = !settings.buildingLabels;
-          //   sceneLayer.labelsVisible = settings.buildingLabels;
-          //   showLabelsBtn.innerHTML = settings.buildingLabels ? "Hide building labels" : "Display building labels";
-          // });
-
-
-          // function getLocation() {
-          //   if (navigator.geolocation) {
-          //     navigator.geolocation.getCurrentPosition(showPosition);
-          //   } else {
-          //     console.log("Geolocation is not supported by this browser.");
-          //   }
-          // }
-
-          // const showLocationBtn = document.getElementById("showLocation");
-          // showLocationBtn.addEventListener("click", function(){
-          //   if (settings.location) {
-          //     settings.location = false;
-          //     view.graphics.removeAll();
-          //     showLocationBtn.innerHTML = "Show user location";
-          //   } else {
-          //     getLocation();
-          //   }
-          // });
-
-          // function showPosition(location) {
-          //   console.log(location);
-
-          //   const graphic = new Graphic({
-          //     geometry: {
-          //       type: "point",
-          //       latitude: location.coords.latitude,
-          //       longitude: location.coords.longitude
-          //     },
-          //     symbol: {
-          //       type: "point-3d",
-          //       symbolLayers: [
-          //         {
-          //           type: "icon",
-          //           resource: {
-          //             href: "youarehere.svg",
-          //           },
-          //           anchor: "bottom-right",
-          //           material: { color: [255, 255, 255] },
-          //           size: 70,
-          //         }
-          //       ]
-          //     },
-          //   })
-
-          //   view.graphics.removeAll();
-          //   view.graphics.add(graphic);
-          //   view.goTo({target: graphic, zoom: 19, tilt: 30}, {speedFactor: 0.7});
-
-          //   settings.location = true;
-          //   showLocationBtn.innerHTML = "Hide user location";
-          // }
-
-          // fake location: longitude: -88.97419803631782, latitude: 39.842138292328
-
-
-          // display a precalculated route
-
-          // const showRouteBtn = document.getElementById("showRoute");
-          // showRouteBtn.addEventListener("click", function(event) {
-          //   settings.route = !settings.route;
-          //   roads.definitionExpression = settings.route ? null : "Class='Street'";
-          //   showRouteBtn.innerHTML = settings.route ? "Hide route" : "Show route to Kirkland Fine Arts Center";
-          // });
-
-          // });
-
-      /* switch the map padding depending on the device */
-
-      // const mqDesktop = window.matchMedia("(min-width: 681px)");
-
-      // setCorrectPadding(mqDesktop);
-      // mqDesktop.addEventListener("change", setCorrectPadding);
-
-      // function setCorrectPadding(mq) {
-      //   if (mq.matches) {
-      //     view.padding = {
-      //       left: 420,
-      //       bottom: 0
-      //     }
-      //   } else {
-      //     const height = document.body.clientHeight;
-      //     const percentageHeight = 4/10 * height;
-      //     view.padding = {
-      //       left: 0,
-      //       bottom: percentageHeight
-      //     }
-      //   }
-      // }
-
-
       });
     </script>
   </head>

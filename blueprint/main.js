@@ -10,15 +10,39 @@ require([
 ], function (FeatureLayer, SceneLayer, Graphic, WebScene, SceneView, Editor, GraphicsLayer, LabelClass) {
   const webscene = new WebScene({
     ground: {
-      surfaceColor: "white",
+      surfaceColor: [1, 87, 133],
     },
   });
 
+  const alpha = 0.8;
+
   const buildingsLayer = new SceneLayer({
-    url: "https://tiles.arcgis.com/tiles/V6ZHFr6zdgNZuVG0/arcgis/rest/services/campus_buildings/SceneServer",
+    url: "https://tiles.arcgis.com/tiles/V6ZHFr6zdgNZuVG0/arcgis/rest/services/campus_buildings_sketch/SceneServer",
     screenSizePerspectiveEnabled: false,
     copyright:
       "Building footprints © <a href='https://www.openstreetmap.org/copyright/en' target='_blank'>OpenStreetMap contributors</a>, 3D models generated with <a href='https://www.esri.com/en-us/arcgis/products/arcgis-cityengine/overview'>CityEngine</a>",
+    renderer: {
+      type: "simple",
+      symbol: {
+        type: "mesh-3d",
+        symbolLayers: [
+          {
+            type: "fill",
+            material: { color: [1, 87, 133, 0.05] },
+            edges: {
+              type: "solid",
+              color: [255, 255, 255],
+              size: 0.5,
+              extensionLength: 0,
+            },
+          },
+        ],
+      },
+    },
+    popupTemplate: {
+      title: "",
+      content: "Building: {NAME}",
+    },
     labelsVisible: false,
     labelingInfo: [
       new LabelClass({
@@ -29,11 +53,11 @@ require([
             {
               type: "text",
               material: {
-                color: [50, 50, 50, 1],
+                color: [255, 255, 255, alpha],
               },
               halo: {
-                size: 2,
-                color: [255, 255, 255, 0.8],
+                size: 0,
+                color: [255, 255, 255, alpha],
               },
               font: {
                 size: 11,
@@ -42,14 +66,14 @@ require([
             },
           ],
           verticalOffset: {
-            screenLength: 20,
-            maxWorldLength: 200,
+            screenLength: 40,
+            maxWorldLength: 500,
             minWorldLength: 0,
           },
           callout: {
             type: "line",
             size: 0.5,
-            color: [50, 50, 50],
+            color: [255, 255, 255, alpha],
             border: {
               color: [0, 0, 0, 0],
             },
@@ -64,19 +88,22 @@ require([
     legendEnabled: false,
     url: "https://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/Campus_features/FeatureServer/0",
     elevationInfo: {
-      mode: "absolute-height",
+      mode: "relative-to-scene",
+      featureExpression: {
+        expression: "0",
+      },
     },
     renderer: {
-      type: "unique-value", // autocasts as new UniqueValueRenderer()
-      field: "Class",
-      defaultSymbol: {
+      type: "simple", // autocasts as new UniqueValueRenderer()
+      symbol: {
         type: "point-3d",
         symbolLayers: [
           {
             type: "object",
-            resource: { href: "../assets/trees/Leyland_Cypress.glb" },
-            material: { color: [86, 140, 10] },
+            resource: { href: "https://static.arcgis.com/arcgis/styleItems/ThematicTrees/web/resource/Unknown.json" },
+            material: { color: [255, 255, 255, 0.5] },
             height: 20,
+            anchor: "bottom",
           },
         ],
       },
@@ -84,7 +111,8 @@ require([
         {
           // size can be modified with the interactive handle
           type: "size",
-          field: "Height",
+          //field: "Height",
+          valueExpression: "$feature.Height/2",
           axis: "height",
           valueUnit: "meters",
         },
@@ -94,46 +122,11 @@ require([
           field: "Rotation",
         },
       ],
-      uniqueValueInfos: [
-        {
-          value: "Eucalyptus",
-          label: "Fagus",
-          symbol: {
-            type: "point-3d",
-            symbolLayers: [
-              {
-                type: "object",
-                resource: { href: "../assets/trees/Blue_Gum_Eucalyptus.glb" },
-                material: { color: [86, 140, 10] },
-                height: 20,
-              },
-            ],
-          },
-        },
-        {
-          value: "Apricot",
-          label: "Larix",
-          symbol: {
-            type: "point-3d",
-            symbolLayers: [
-              {
-                type: "object",
-                resource: { href: "../assets/trees/Apricot.glb" },
-                material: { color: [142, 181, 87] },
-                height: 20,
-              },
-            ],
-          },
-        },
-      ],
     },
   });
 
   const areasLayer = new FeatureLayer({
     url: "https://services.arcgis.com/V6ZHFr6zdgNZuVG0/arcgis/rest/services/Campus_features/FeatureServer/2",
-    elevationInfo: {
-      mode: "on-the-ground",
-    },
     title: "Areas",
     renderer: {
       type: "unique-value",
@@ -146,9 +139,12 @@ require([
             type: "polygon-3d",
             symbolLayers: [
               {
-                type: "extrude",
-                material: { color: [178, 195, 136, 1] },
-                size: 0.5,
+                type: "fill",
+                material: { color: [1, 87, 133] },
+                outline: {
+                  color: [255, 255, 255, 0.3],
+                  size: 1.2,
+                },
               },
             ],
           },
@@ -159,11 +155,14 @@ require([
             type: "polygon-3d",
             symbolLayers: [
               {
-                type: "water",
-                waveDirection: 260,
-                color: "#a5c2d1",
-                waveStrength: "rippled",
-                waterbodySize: "small",
+                type: "fill",
+                pattern: {
+                  type: "style",
+                  style: "forward-diagonal",
+                },
+                material: {
+                  color: [255, 255, 255],
+                },
               },
             ],
           },
@@ -176,7 +175,7 @@ require([
             symbolLayers: [
               {
                 type: "fill",
-                material: { color: [255, 225, 181, 0.3] },
+                material: { color: [1, 87, 133, 0] },
               },
             ],
           },
@@ -187,9 +186,14 @@ require([
             type: "polygon-3d",
             symbolLayers: [
               {
-                type: "extrude",
-                material: { color: [150, 150, 150, 1] },
-                size: 0.2,
+                type: "fill",
+                pattern: {
+                  type: "style",
+                  style: "horizontal",
+                },
+                material: {
+                  color: [255, 255, 255],
+                },
               },
             ],
           },
@@ -213,27 +217,34 @@ require([
               {
                 type: "icon",
                 resource: {
-                  href: "https://static.arcgis.com/arcgis/styleItems/Icons/web/resource/StandingCircle.svg",
+                  primitive: "circle",
                 },
-                material: { color: [9, 122, 181] },
+                material: { color: [0, 0, 0, 0] },
+                outline: {
+                  color: [255, 255, 255, alpha],
+                  size: 1,
+                },
                 size: 18,
+                anchor: "bottom",
               },
               {
                 type: "icon",
                 resource: { href: "https://static.arcgis.com/arcgis/styleItems/Icons/web/resource/Parking.svg" },
-                material: { color: [255, 255, 255] },
+                material: { color: [255, 255, 255, alpha] },
                 size: 10,
+                anchor: "relative",
+                anchorPosition: { x: 0, y: 1 },
               },
             ],
             verticalOffset: {
-              screenLength: 10,
+              screenLength: 20,
               maxWorldLength: 10000,
               minWorldLength: 5,
             },
             callout: {
               type: "line",
               size: 1,
-              color: [255, 255, 255, 1],
+              color: [255, 255, 255, alpha],
               border: {
                 color: [0, 0, 0, 0],
               },
@@ -251,7 +262,7 @@ require([
                   href: "../assets/icon.svg",
                 },
 
-                material: { color: [255, 255, 255] },
+                material: { color: [255, 255, 255, alpha] },
                 size: 70,
               },
             ],
@@ -276,18 +287,7 @@ require([
               {
                 type: "path",
                 profile: "quad",
-                material: { color: [150, 150, 150, 1] },
-                width: 10,
-                height: 0.2,
-                join: "miter",
-                cap: "butt",
-                anchor: "bottom",
-                profileRotation: "all",
-              },
-              {
-                type: "path",
-                profile: "quad",
-                material: { color: [255, 255, 255, 1] },
+                material: { color: [255, 255, 255, 0.5] },
                 width: 1,
                 height: 0.4,
                 join: "miter",
@@ -306,15 +306,21 @@ require([
 
   const view = new SceneView({
     container: "viewDiv",
-    qualityProfile: "medium",
+    qualityProfile: "high",
     map: webscene,
     environment: {
       lighting: {
-        date: "Mon Feb 15 2021 21:30:00 GMT+0100 (Central European Standard Time)",
-        ambientOcclusionEnabled: true,
-        directShadowsEnabled: true,
-        waterReflectionEnabled: true,
+        date: "Mon Sep 15 2021 20:30:00 GMT+0100 (Central European Standard Time)",
+        ambientOcclusionEnabled: false,
+        directShadowsEnabled: false,
+        waterReflectionEnabled: false,
       },
+      background: {
+        type: "color",
+        color: [1, 87, 133],
+      },
+      starsEnabled: false,
+      atmosphereEnabled: false,
     },
     camera: {
       position: [-88.97900008, 39.83987331, 149.51383],
@@ -325,6 +331,10 @@ require([
       altitude: {
         max: 500,
       },
+    },
+    highlightOptions: {
+      color: "#ffffff",
+      fillOpacity: 0.1,
     },
   });
 
@@ -407,7 +417,7 @@ require([
           {
             type: "object",
             resource: { href: "../assets/arrow/RLab-arrow.gltf" },
-            material: { color: [162, 132, 245] },
+            material: { color: [255, 255, 255] },
             height: 3,
             tilt: 270,
             heading: 90,
@@ -421,7 +431,7 @@ require([
             resource: { primitive: "circle" },
             material: { color: [255, 250, 239, 0] },
             outline: {
-              color: [162, 132, 245],
+              color: [255, 255, 255],
               size: 3,
             },
             size: 40,

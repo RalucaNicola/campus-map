@@ -15,10 +15,14 @@ require([
   });
 
   const buildingsLayer = new SceneLayer({
-    url: "https://tiles.arcgis.com/tiles/V6ZHFr6zdgNZuVG0/arcgis/rest/services/campus_buildings/SceneServer",
+    url: "https://tiles.arcgis.com/tiles/V6ZHFr6zdgNZuVG0/arcgis/rest/services/campus_buildings_dominant_color/SceneServer",
     screenSizePerspectiveEnabled: false,
     copyright:
       "Building footprints © <a href='https://www.openstreetmap.org/copyright/en' target='_blank'>OpenStreetMap contributors</a>, 3D models generated with <a href='https://www.esri.com/en-us/arcgis/products/arcgis-cityengine/overview'>CityEngine</a>",
+    popupTemplate: {
+      title: "",
+      content: "Building: {NAME}",
+    },
     labelsVisible: false,
     labelingInfo: [
       new LabelClass({
@@ -84,7 +88,8 @@ require([
         {
           // size can be modified with the interactive handle
           type: "size",
-          field: "Height",
+          // field: "Height",
+          valueExpression: "$feature.Height/1.5",
           axis: "height",
           valueUnit: "meters",
         },
@@ -146,8 +151,8 @@ require([
             type: "polygon-3d",
             symbolLayers: [
               {
-                type: "extrude",
-                material: { color: [178, 195, 136, 1] },
+                type: "fill",
+                material: { color: [198, 220, 232] },
                 size: 0.5,
               },
             ],
@@ -176,7 +181,7 @@ require([
             symbolLayers: [
               {
                 type: "fill",
-                material: { color: [255, 225, 181, 0.3] },
+                material: { color: [225, 239, 247, 0.3] },
               },
             ],
           },
@@ -187,8 +192,8 @@ require([
             type: "polygon-3d",
             symbolLayers: [
               {
-                type: "extrude",
-                material: { color: [150, 150, 150, 1] },
+                type: "fill",
+                material: { color: [200, 200, 200, 1] },
                 size: 0.2,
               },
             ],
@@ -276,9 +281,9 @@ require([
               {
                 type: "path",
                 profile: "quad",
-                material: { color: [150, 150, 150, 1] },
+                material: { color: [230, 230, 230, 1] },
                 width: 10,
-                height: 0.2,
+                height: 0.1,
                 join: "miter",
                 cap: "butt",
                 anchor: "bottom",
@@ -289,7 +294,7 @@ require([
                 profile: "quad",
                 material: { color: [255, 255, 255, 1] },
                 width: 1,
-                height: 0.4,
+                height: 0.2,
                 join: "miter",
                 cap: "butt",
                 anchor: "bottom",
@@ -306,7 +311,7 @@ require([
 
   const view = new SceneView({
     container: "viewDiv",
-    qualityProfile: "medium",
+    qualityProfile: "high",
     map: webscene,
     environment: {
       lighting: {
@@ -325,6 +330,10 @@ require([
       altitude: {
         max: 500,
       },
+    },
+    highlightOptions: {
+      color: "#ffffff",
+      fillOpacity: 0.6,
     },
   });
 

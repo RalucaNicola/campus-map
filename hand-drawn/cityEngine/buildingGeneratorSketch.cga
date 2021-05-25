@@ -1,0 +1,338 @@
+/**
+ * File:    building.cga
+ * Created: 21 Aug 2020 12:25:40 GMT
+ * Author:  Esri R&D Center Zurich
+ */
+
+version "2020.0"
+
+
+// ------------------------------
+// Attributes
+// ------------------------------
+
+@Group("Info", 0)
+
+@Order(1)
+attr name = ""
+
+
+@Group("Building Mass", 1)
+
+@Order(1)
+@Range(min=3, max=80, stepsize=1, restricted=false)
+attr height = 20
+
+@Order(2)
+@Range(min=0, max=10, stepsize=1, restricted=false)
+attr roofHeight = 5
+
+@Order(3)
+@Enum("flat", "gable", "hip", "mansard", "M shaped")
+attr roofShape = getInitRoofShape
+
+
+@Group("Mass Details", 2)
+
+@Order(1)
+@Range(min=0, max=5, stepsize=1, restricted=false)
+attr numBoxesOnFlatRoof = 2
+
+@Order(2)
+@Range(min=0, max=10, stepsize=0.5, restricted=false)
+@Description("has tower/podium when non-negative")
+attr podiumHeight = 0
+
+
+@Group("Facade Details", 3)
+
+@Order(1)
+@Range(min=3, max=5, stepsize=0.5, restricted=false)
+attr floorHeight = 4
+
+@Order(2)
+@Range(min=0, max=2, stepsize=0.1, restricted=false)
+attr raisedHeight = 0.5 * floorHeight
+
+@Order(3)
+@Range(min=1, max=10, stepsize=1, restricted=false)
+attr tileWidth = 4
+
+@Order(4)
+@Range(min=1, max=5, stepsize=1, restricted=false)
+attr windowWidth = 2
+
+@Order(5)
+@Range(min=1, max=5, stepsize=1, restricted=false)
+attr windowHeight = 2
+
+@Order(6)
+@Range(min=0.05, max=0.5, stepsize=0.05, restricted=false)
+attr windowDepth = 0.01
+
+@Order(7)
+@Range(min=10, max=60, stepsize=5, restricted=false)
+@Description("split facades into pieces of approximately this facade length or less")
+attr approxFacadeWidth = 40
+
+@Order(8)
+@Description("approx width of breaks between long facades")
+@Range(min=1, max=10, stepsize=1, restricted=false)
+attr innerPaddingWidth = 4
+
+
+@Group("Roof Materials", 4)
+
+@Order(1)
+@Color
+attr roofColor = "#ffffff"
+
+@Order(2)
+@File
+@Enum("", "images/pattern.jpg", restricted=false)
+attr roofTexture = getInitRoofTexture
+
+@Order(3)
+attr roofTextureWidth = 60
+
+@Order(4)
+@Color
+attr boxOnRoofColor = "#ffffff"
+
+
+@Group("Facade Colors", 5)
+
+@Order(1)
+@Color
+attr wallColor = "#ffffff"
+
+@Order(2)
+@Color
+attr windowColor = "#ffffff"
+
+
+@Group("Locally Editable Attributes", 6)
+
+@Order(1)
+@Handle(shape=Facade, type=selector, occlusion=false)
+@Enum("wall", "windows", "one window", "double windows 1", "double windows 2")
+attr windowPattern = "windows"
+
+
+@Hidden
+attr _isPodium = false
+@Hidden
+attr _isTower = false
+
+
+// ------------------------------
+// Constants and Functions
+// ------------------------------
+
+const cleanupTolerance = 0.2
+const minTowerFraction = 0.6		// tower is fraction of orig width
+const maxTowerFraction = 0.8
+const roofOverhang = 0.5
+const raisedBorderRoofWidth = 0.25	// raised border on flat roof
+const raisedBorderRoofHeight = 0.5
+const minBoxWidth = 3				// boxes on flat roof
+const minBoxHeight = 1
+const maxBoxHeight = max(minBoxHeight, roofHeight)
+const mansardAngle = 70				// angle of lower slope of mansard roof
+const mansardFraction = 0.7			// fraction of roofHeight for lower part of mansard roof
+const roofTextureHeight = roofTextureWidth*imageInfo(roofTexture, sy)/imageInfo(roofTexture, sx)
+
+getInitRoofShape =
+	case roofHeight==0:			"flat"
+	case geometry.area>4000:	"mansard"
+	else: 						"hip"
+	
+getInitRoofTexture =
+	case roofShape=="flat":		""
+	else:						"images/pattern.jpg"
+
+getMinBoxWidth = max(min(0.1*scope.sx, 0.1*scope.sy), minBoxWidth)
+getMaxBoxWidth = max(min(0.4*scope.sx, 0.4*scope.sy), minBoxWidth)
+
+
+
+// ------------------------------
+// Start Rule
+// ------------------------------
+
+
+Lot -->
+	case podiumHeight>0:
+		Reports
+		cleanupGeometry(all, cleanupTolerance)
+		Podium
+		Tower
+	else:
+	   	Reports
+	   	cleanupGeometry(all, cleanupTolerance)
+		extrude(height-roofHeight)
+		Mass
+
+
+// ------------------------------
+// Mass
+// ------------------------------
+
+Podium -->
+	set(_isPodium, true)
+	set(roofShape, "flat")
+	set(numBoxesOnFlatRoof, 0)
+	extrude(podiumHeight)
+	Mass
+	
+Tower -->
+	t(0, podiumHeight, 0)
+	alignScopeToGeometry(yUp, largest, longest)
+	innerRectangle(scope) { shape: Tower_Resize(scope.sx, scope.sz, rand(minTowerFraction, maxTowerFraction)*scope.sx, rand(minTowerFraction, maxTowerFraction)*scope.sz) }
+	
+Tower_Resize(x, z, newX, newZ) -->
+	s(newX, 0, newZ)
+	t(rand(0, x-newX), 0, rand(0, z-newZ))
+	extrude(height-podiumHeight-roofHeight)
+	set(_isTower, true)
+	Mass
+		
+Mass -->
+    comp(f) { top= Roof
+    		| side: Facade(windowPattern)
+    		| bottom: Bottom. }
+   	
+// ------------------------------
+// Roof
+// ------------------------------
+
+Roof --> 
+	case roofShape=="flat":		FlatRoof
+	case roofShape=="gable":	GableRoof
+	case roofShape=="hip":		HipRoof
+	case roofShape=="mansard": 	MansardRoof
+	case roofShape=="M shaped":	MShapedRoof
+	else:						HipRoof
+		
+FlatRoof -->
+    offset(-raisedBorderRoofWidth)
+    comp(f) { inside: RoofMaterial
+    				  Boxes(getMinBoxWidth, getMaxBoxWidth)
+    		| border= extrude(raisedBorderRoofHeight)
+    				  comp(f) { top= RoofMaterial
+    				  		  | all: RoofMaterial } }
+    
+Boxes(minWidth, maxWidth) -->
+	case numBoxesOnFlatRoof>0:
+		offset(-0.5*maxWidth)
+		comp(f) { inside: scatter(surface, numBoxesOnFlatRoof, uniform) { Box(minWidth, maxWidth) } }
+	else:
+		NIL
+
+Box(minWidth, maxWidth) -->
+	set(trim.vertical, false)
+	primitiveCube()
+	s(rand(minWidth,maxWidth), rand(minBoxHeight,maxBoxHeight), rand(minWidth,maxWidth))
+	center(xz)
+	color(boxOnRoofColor)
+
+GableRoof -->
+	roofGable(byHeight, roofHeight, roofOverhang)
+	comp(f) { vertical: Wall
+			| all: RoofMaterial }
+	
+HipRoof -->
+    roofHip(byHeight, roofHeight, roofOverhang)
+    comp(f) { all: RoofMaterial }
+    
+MansardRoof -->
+	roofHip(byAngle, mansardAngle, roofOverhang)
+	split(y) { mansardFraction*roofHeight: comp(f) { bottom: NIL
+									   | top: roofHip(byHeight, (1-mansardFraction)*roofHeight)
+									   		  comp(f) { all: RoofMaterial }
+									   | all: RoofMaterial } }
+
+MShapedRoof -->
+	comp(f) { all: alignScopeToGeometry(yUp, any, longest)
+				   split(z) { ~1: GableRoof | ~1: GableRoof } }
+
+RoofMaterial -->
+    color(roofColor)
+    alignScopeToAxes()
+	setupProjection(0, scope.xz, roofTextureWidth, roofTextureHeight, 0, 0, 0)
+	texture(roofTexture)
+	projectUV(0)
+	
+	
+// ------------------------------
+// Facade
+// ------------------------------
+
+Facade(pattern) -->
+	Wall
+	split(y) { raisedHeight: NIL
+			 | { ~floorHeight: Floor(split.index, pattern) }* }
+ 
+Floor(floorInd, pattern) --> 
+	case scope.sx<windowWidth:
+		NIL
+	else:
+		split(x) { ~1: NIL
+				 | ~12: FloorSection(pattern)
+				 | ~1: NIL }
+
+FloorSection(pattern) -->
+	split(x) { { ~approxFacadeWidth: Windows(pattern)
+			   | ~innerPaddingWidth: NIL }*
+			 | ~approxFacadeWidth: Windows(pattern) }
+		
+Windows(pattern) -->
+	case pattern=="wall":
+		NIL
+	case pattern=="one window":
+		Tile
+	case pattern=="double windows 1":
+		split(x) { ~1: NIL
+				 | ~tileWidth: Tile
+				 | ~tileWidth: Tile
+				 | ~1: NIL }*
+	case pattern=="double windows 2":
+		split(x) { ~tileWidth: Tile_DoubleWindow }*
+	else:
+		split(x) { ~tileWidth: Tile }*
+	
+Tile -->
+	s(windowWidth, windowHeight, 0)
+	center(xy)
+	t(0,0,windowDepth)
+	Window
+	
+Tile_DoubleWindow -->
+	s(2*windowWidth, windowHeight, 0)
+	center(xy)
+	t(0,0,windowDepth)
+	Window
+
+Window -->
+    set(material.shader, "CityEnginePBRShader")
+    set(material.emissive.r, 0.3)
+    set(material.emissive.g, 0.3)
+    set(material.emissive.b, 0.3)
+	color(windowColor)
+		
+Wall -->
+    set(material.shader, "CityEnginePBRShader")
+    set(material.emissive.r, 0.3)
+    set(material.emissive.g, 0.3)
+    set(material.emissive.b, 0.3)
+    color(wallColor)
+	
+	
+// ------------------------------
+// Reports
+// ------------------------------
+
+Reports -->
+	report("name", name)
+    
+	
