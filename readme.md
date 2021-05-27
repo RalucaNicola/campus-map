@@ -1,7 +1,7 @@
 # Campus map styles
 
-[![styles](styles.png)]()
-[Campus styles - live app]()
+[![styles](styles.png)](https://storymaps.arcgis.com/stories/8692e3a5c1c049ae8727e4a218eac928/)
+[Campus styles - live app](https://storymaps.arcgis.com/stories/8692e3a5c1c049ae8727e4a218eac928/)
 
 ## Introduction
 
