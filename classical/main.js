@@ -14,11 +14,48 @@ require([
     },
   });
 
+  const view = new SceneView({
+    container: "viewDiv",
+    qualityProfile: "high",
+    map: webscene,
+    environment: {
+      lighting: {
+        date: "Mon Feb 15 2021 21:30:00 GMT+0100 (Central European Standard Time)",
+        ambientOcclusionEnabled: false,
+        directShadowsEnabled: true,
+        waterReflectionEnabled: true,
+      },
+    },
+    camera: {
+      position: [-88.97955612, 39.83921313, 149.51383],
+      heading: 45.34,
+      tilt: 70.69,
+    },
+    constraints: {
+      altitude: {
+        max: 500,
+      },
+    },
+    popup: {
+      dockEnabled: true,
+      dockOptions: {
+        // Disables the dock button from the popup
+        buttonEnabled: false,
+        // Ignore the default sizes that trigger responsive docking
+        breakpoint: false,
+      },
+    },
+  });
+
   const buildingsLayer = new SceneLayer({
     url: "https://tiles.arcgis.com/tiles/V6ZHFr6zdgNZuVG0/arcgis/rest/services/campus_buildings/SceneServer",
     screenSizePerspectiveEnabled: false,
     copyright:
       "Building footprints © <a href='https://www.openstreetmap.org/copyright/en' target='_blank'>OpenStreetMap contributors</a>, 3D models generated with <a href='https://www.esri.com/en-us/arcgis/products/arcgis-cityengine/overview'>CityEngine</a>",
+    popupTemplate: {
+      title: "",
+      content: "Building: {NAME}",
+    },
     labelsVisible: false,
     labelingInfo: [
       new LabelClass({
@@ -304,30 +341,6 @@ require([
 
   webscene.addMany([buildingsLayer, treesLayer, areasLayer, poi, roads]);
 
-  const view = new SceneView({
-    container: "viewDiv",
-    qualityProfile: "medium",
-    map: webscene,
-    environment: {
-      lighting: {
-        date: "Mon Feb 15 2021 21:30:00 GMT+0100 (Central European Standard Time)",
-        ambientOcclusionEnabled: true,
-        directShadowsEnabled: true,
-        waterReflectionEnabled: true,
-      },
-    },
-    camera: {
-      position: [-88.97955612, 39.83921313, 149.51383],
-      heading: 45.34,
-      tilt: 70.69,
-    },
-    constraints: {
-      altitude: {
-        max: 500,
-      },
-    },
-  });
-
   // uncomment these lines if you want to edit features in the scene
   // const editor = new Editor({
   //   view: view,
@@ -436,28 +449,5 @@ require([
 
     settings.location = true;
     showLocationBtn.innerHTML = "Hide user location";
-  }
-
-  /* switch the map padding depending on the device */
-
-  const mqDesktop = window.matchMedia("(min-width: 681px)");
-
-  setCorrectPadding(mqDesktop);
-  mqDesktop.addEventListener("change", setCorrectPadding);
-
-  function setCorrectPadding(mq) {
-    if (mq.matches) {
-      view.padding = {
-        left: 420,
-        bottom: 0,
-      };
-    } else {
-      const height = document.body.clientHeight;
-      const percentageHeight = (4 / 10) * height;
-      view.padding = {
-        left: 0,
-        bottom: percentageHeight,
-      };
-    }
   }
 });

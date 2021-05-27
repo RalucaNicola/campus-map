@@ -3,10 +3,10 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
-    <title>Campus map prototype</title>
+    <title>Campus map - blueprint</title>
 
     <link rel="stylesheet" href="https://js.arcgis.com/4.19/esri/themes/light/main.css" />
-    <link rel="stylesheet" href="style.css"/>
+    <link rel="stylesheet" href="style.css" />
 
     <script src="https://js.arcgis.com/4.19/"></script>
     <script src="main.js"></script>
@@ -15,19 +15,8 @@
   <body>
     <div id="viewDiv"></div>
     <div class="main">
-      <div class="title">
-        <h3>A campus map</h3>
-      </div>
-      <div class="sections">
-        <div class="section">
-          <p>This is a demo app of a fictive campus map, based on the <a href="https://millikin.edu/campus-maps">Millikin University campus</a> footprint. It was created using <a href="https://www.esri.com/en-us/arcgis/products/arcgis-cityengine/overview">CityEngine</a> to generate the buildings and the editing widget in <a href="https://developers.arcgis.com/javascript/latest/">ArcGIS API for JavaScript</a> to create the basemap. The map is rendered with ArcGIS API for JavaScript.
-          </p>
-          </div>
-          <button id="showLabels" class="esri-button">Display building labels</button>
-          <button id="showLocation" class="esri-button">Show user location</button>
-        </div>
-      </div>
+      <button id="showLabels" class="esri-button">Display building labels</button>
+      <button id="showLocation" class="esri-button">Show user location</button>
     </div>
-    <div id="editorDiv"></div>
   </body>
 </html>

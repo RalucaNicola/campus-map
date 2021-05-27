@@ -4,10 +4,9 @@ require([
   "esri/Graphic",
   "esri/WebScene",
   "esri/views/SceneView",
-  "esri/widgets/Editor",
   "esri/layers/GraphicsLayer",
   "esri/layers/support/LabelClass",
-], function (FeatureLayer, SceneLayer, Graphic, WebScene, SceneView, Editor, GraphicsLayer, LabelClass) {
+], function (FeatureLayer, SceneLayer, Graphic, WebScene, SceneView, GraphicsLayer, LabelClass) {
   const webscene = new WebScene({
     ground: {
       surfaceColor: [1, 87, 133],
@@ -313,7 +312,6 @@ require([
         date: "Mon Sep 15 2021 20:30:00 GMT+0100 (Central European Standard Time)",
         ambientOcclusionEnabled: false,
         directShadowsEnabled: false,
-        waterReflectionEnabled: false,
       },
       background: {
         type: "color",
@@ -336,20 +334,16 @@ require([
       color: "#ffffff",
       fillOpacity: 0.1,
     },
+    popup: {
+      dockEnabled: true,
+      dockOptions: {
+        // Disables the dock button from the popup
+        buttonEnabled: false,
+        // Ignore the default sizes that trigger responsive docking
+        breakpoint: false,
+      },
+    },
   });
-
-  // uncomment these lines if you want to edit features in the scene
-  // const editor = new Editor({
-  //   view: view,
-  // });
-  // const snappingSources = [{ layer: areasLayer}, {layer: roads}];
-  // editor.viewModel.sketchViewModel.snappingOptions = {
-  //   enabled: true,
-  //   selfEnabled: true,
-  //   featureEnabled: true,
-  //   featureSources: snappingSources
-  // };
-  // view.ui.add(editor, "top-right");
 
   const settings = {
     buildingLabels: false,
@@ -446,28 +440,5 @@ require([
 
     settings.location = true;
     showLocationBtn.innerHTML = "Hide user location";
-  }
-
-  /* switch the map padding depending on the device */
-
-  const mqDesktop = window.matchMedia("(min-width: 681px)");
-
-  setCorrectPadding(mqDesktop);
-  mqDesktop.addEventListener("change", setCorrectPadding);
-
-  function setCorrectPadding(mq) {
-    if (mq.matches) {
-      view.padding = {
-        left: 420,
-        bottom: 0,
-      };
-    } else {
-      const height = document.body.clientHeight;
-      const percentageHeight = (4 / 10) * height;
-      view.padding = {
-        left: 0,
-        bottom: percentageHeight,
-      };
-    }
   }
 });

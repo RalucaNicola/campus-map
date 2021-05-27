@@ -1,0 +1,39 @@
+@font-face {
+  font-family: "Amatic SC";
+  font-style: normal;
+  font-weight: 700;
+  font-display: auto;
+  src: url(../assets/TUZ3zwprpvBS1izr_vOMscGKfrUC_2fi-Q.woff2) format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC,
+    U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+html,
+body,
+#viewDiv {
+  padding: 0;
+  margin: 0;
+  height: 100%;
+  width: 100%;
+}
+
+.main {
+  padding: 0;
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  right: 20px;
+  overflow: auto;
+  display: flex;
+  justify-content: center;
+}
+
+button {
+  margin: 1em;
+  max-width: 300px;
+  font-family: "Avenir Next", Arial, sans-serif !important;
+}
+
+canvas {
+  filter: saturate(1.6);
+}

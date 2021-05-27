@@ -1,0 +1,25 @@
+html,
+body,
+#viewDiv {
+  padding: 0;
+  margin: 0;
+  height: 100%;
+  width: 100%;
+}
+
+.main {
+  padding: 0;
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  right: 20px;
+  overflow: auto;
+  display: flex;
+  justify-content: center;
+}
+
+button {
+  margin: 1em;
+  max-width: 300px;
+  font-family: "Avenir Next", Arial, sans-serif !important;
+}
