@@ -23,11 +23,11 @@ The steps to create the classical campus map are the following:
 
 The starting point for this are the building footprints. Using the [Get map data](https://doc.arcgis.com/en/cityengine/2019.0/help/cityengine-help-get-map-data.htm) functionality in CityEngine we can download the building footprints for a given extent.
 
-Next we'll write procedural rules to generate the 3D models of the buildings. [Here](./classical/cga-rule/building.cga) you can find the cga file with the rules for the classical style. The rules are based on a few assumptions that we made for the buildings on this campus:
+Next we'll write procedural rules to generate the 3D models of the buildings. [Here](./classical/cga-rule/building.cga) you can find the .cga file with the rules for the classical style. The rules are based on a few assumptions that we made for the buildings on this campus:
 
 - The body of the building is created by extruding the footprint to a given height. In some cases the height might be included in the OSM data.
-- The floor height is adjustable. Each floor has windows with adjustable width, height and depth. Using local edits you can define whether to have single windows, double windows or no windows at all.
-- There are four types of roofs that can be applied to a building: a flat roof, a gable roof, a mansard roof and a hip roof. A flat roof can have one or more access hatches that are placed randomly. The roof color is adjustable.
+- The floor height is adjustable. Each floor has windows with adjustable width, height and depth. Using local edits on each facade and/or on each floor you can define whether to have single windows, double windows or no windows at all.
+- There are four types of roofs that can be applied to a building: a flat roof, a gable roof, a mansard roof, a hip roof and an M shaped roof. A flat roof can have one or more access hatches that are placed randomly. The roof color is adjustable.
 - Individual parts of the building can have different colors: the corners, the ground floor, the top floor and the floors in between can all have different colors.
 
 The rule assigns default values for attributes like building height or roof type:
