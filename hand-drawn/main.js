@@ -53,7 +53,12 @@ require([
       content: "Building: {NAME}",
     },
     labelsVisible: false,
-    labelingInfo: [
+  });
+
+  webscene.add(buildingsLayer);
+
+  function setBuildingLabels(font) {
+    buildingsLayer.labelingInfo = [
       new LabelClass({
         labelExpressionInfo: { expression: "$feature.name" },
         symbol: {
@@ -70,7 +75,7 @@ require([
               },
               font: {
                 size: 14,
-                family: `'Amatic SC', 'Avenir Next', sans-serif`,
+                family: font,
               },
             },
           ],
@@ -89,10 +94,16 @@ require([
           },
         },
       }),
-    ],
-  });
+    ];
+  }
 
-  webscene.add(buildingsLayer);
+  try {
+    document.fonts.load(`14pt 'Amatic SC'`).then(function () {
+      setBuildingLabels(`'Amatic SC'`);
+    });
+  } catch {
+    setBuildingLabels(`'Avenir Next', sans-serif`);
+  }
 
   const treeLayer = new GraphicsLayer({
     elevationInfo: {
@@ -275,7 +286,6 @@ require([
     },
   });
   webscene.add(poi);
-
   const view = new SceneView({
     container: "viewDiv",
     qualityProfile: "high",
