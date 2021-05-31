@@ -1,12 +1,12 @@
 # Campus map styles
 
 [![styles](styles.png)](https://arcg.is/zOnWb)
-[Campus styles - story map](https://arcg.is/zOnWb)
+[Campus styles - storymap](https://arcg.is/zOnWb)
 
-[Campus map - classic](https://ralucanicola.github.io/campus-map/classical/)
-[Campus map - hand-drawn](https://ralucanicola.github.io/campus-map/hand-drawn/)
-[Campus map - branded](https://ralucanicola.github.io/campus-map/branded/)
-[Campus map - blueprint](https://ralucanicola.github.io/campus-map/blueprint/)
+Styles: [classic](https://ralucanicola.github.io/campus-map/classical/) |
+[hand-drawn](https://ralucanicola.github.io/campus-map/hand-drawn/) |
+[branded](https://ralucanicola.github.io/campus-map/branded/) |
+[blueprint](https://ralucanicola.github.io/campus-map/blueprint/)
 
 ## Introduction
 
